@@ -11,6 +11,7 @@ export default function Index() {
       text1: 'Hello Zeeshan! 👋',
       text2: 'This is a toast message.',
     });
+    router.replace('/(tabs)/Homescreen'); // ✅ corrected
   };
 
   const checkFirebaseAuth = () => {
@@ -23,7 +24,6 @@ export default function Index() {
         text1: '✅ Logged In',
         text2: `Welcome back, ${user.email}`,
       });
-      router.replace('/(drawer)/Homescreen'); // ✅ corrected
     } else {
       Toast.show({
         type: 'error',

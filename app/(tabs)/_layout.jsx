@@ -33,13 +33,13 @@ export default function TabLayout() {
       }}
     >
       {/* Home Tab */}
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="Homescreen"
         options={{
           tabBarIcon: ({ color }) => <Ionicons name="home-outline" size={24} color={color} />,
           tabBarLabel: 'Home',
         }}
-      />
+      /> */}
 
       {/* LiveQuiz Tab */}
       <Tabs.Screen
@@ -61,7 +61,7 @@ export default function TabLayout() {
 
       {/* Profile Tab */}
       <Tabs.Screen
-        name="Homescreen"
+        name="Profilescreen"
         options={{
           tabBarIcon: ({ color }) => <Ionicons name="person-outline" size={24} color={color} />,
           tabBarLabel: 'Profile',
