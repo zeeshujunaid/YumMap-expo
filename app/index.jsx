@@ -1,44 +1,81 @@
-import { View, Button } from 'react-native';
-import Toast from 'react-native-toast-message';
-import { getAuth } from 'firebase/auth';
-import { router } from 'expo-router';
-import app from '../Utils/Firebase'; // make sure this is correct
+import React, { useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  ImageBackground,
+  Animated,
+  StyleSheet,
+  StatusBar,
+} from 'react-native';
 
 export default function Index() {
-  const showToast = () => {
-    Toast.show({
-      type: 'success',
-      text1: 'Hello Zeeshan! 👋',
-      text2: 'This is a toast message.',
-    });
-    router.replace('/(tabs)/Homescreen'); // ✅ corrected
-  };
+  const logoScale = useRef(new Animated.Value(1.8)).current;
 
-  const checkFirebaseAuth = () => {
-    const auth = getAuth(app);
-    const user = auth.currentUser;
-
-    if (user) {
-      Toast.show({
-        type: 'success',
-        text1: '✅ Logged In',
-        text2: `Welcome back, ${user.email}`,
-      });
-    } else {
-      Toast.show({
-        type: 'error',
-        text1: '❌ Not Logged In',
-        text2: 'No user found in Firebase Auth.',
-      });
-      router.replace('/(auth)/Login'); // ✅ send to login screen
-    }
-  };
+  // ✅ Animate logo scaling effect
+  useEffect(() => {
+    Animated.spring(logoScale, {
+      toValue: 1,
+      friction: 3,
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Button title="Show Toast" onPress={showToast} />
-      <View style={{ height: 20 }} />
-      <Button title="Check Firebase Auth & Go to Drawer" onPress={checkFirebaseAuth} />
-    </View>
+    <ImageBackground
+      source={require('../assets/images/yummapbg2.png')} // Replace with your image
+      resizeMode="cover"
+      style={styles.background}
+    >
+      <StatusBar hidden={true} />
+
+      <View style={styles.overlay} />
+
+      <View style={styles.container}>
+        <Animated.Image
+          source={require('../assets/images/YumMap.png')} // Replace with your logo
+          style={[styles.logo, { transform: [{ scale: logoScale }] }]}
+        />
+
+        <Text style={styles.title}>Welcome To</Text>
+        <Text style={styles.subtitle}>A Food Discovery App!</Text>
+      </View>
+    </ImageBackground>
   );
 }
+
+const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  logo: {
+    width: 250,
+    height: 240,
+    marginBottom: 30,
+  },
+  title: {
+    fontSize: 44,
+    fontWeight: 'bold',
+    color: '#fae7c1',
+    marginBottom: 10,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  subtitle: {
+    fontSize: 18,
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 40,
+    paddingHorizontal: 10,
+  },
+});
