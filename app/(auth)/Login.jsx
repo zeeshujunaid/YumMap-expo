@@ -14,17 +14,24 @@ import {
 } from 'react-native';
 import React, { useState } from 'react';
 import { auth } from '../../Utils/Firebase'; // ✅ Firebase Web SDK auth
+import { useRouter } from 'expo-router';
+import Toast from 'react-native-toast-message';
 // import Forgetpassword from '../components/forgetpassword';
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const [showForgotModal, setShowForgotModal] = useState(false);
 
   const handleLogin = () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password.');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Please fill in all fields.',
+      })
       return;
     }
 
@@ -33,8 +40,12 @@ export default function Login({ navigation }) {
     auth
       .signInWithEmailAndPassword(auth, email, password)
       .then(() => {
-        Alert.alert('Success', 'Logged in successfully!');
-        navigation.navigate('MainApp');
+        Toast.show({
+          type: 'success',
+          text1: 'Login Successful',
+          text2: 'Welcome back!',
+        });
+        router.push('/(tabs)/Home');
         setEmail('');
         setPassword('');
         setLoading(false);
@@ -42,7 +53,12 @@ export default function Login({ navigation }) {
       .catch((error) => {
         console.error('Login Error:', error);
         setLoading(false);
-        Alert.alert('Login Error', 'Please sign up if you haven’t already.');
+        Toast.show({
+          type: 'error',
+          text1: 'Login Failed',
+          text2: error.message,
+        });
+        router.push('/(auth)/Login');
         setEmail('');
         setPassword('');
       });
@@ -142,19 +158,21 @@ export default function Login({ navigation }) {
                 flexDirection: 'row',
                 justifyContent: 'space-around',
                 marginTop: 20,
+                gap:90,
+                width:"100%",
               }}
             >
-              <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+              <TouchableOpacity onPress={() => router.push('/Signup')}>
                 <Text style={{ color: '#FF4D4D', fontSize: 12 }}>
                   Don’t have an account?
                 </Text>
               </TouchableOpacity>
 
-              {/* <TouchableOpacity onPress={() => setShowForgotModal(true)}>
+              <TouchableOpacity onPress={() => setShowForgotModal(true)}>
                 <Text style={{ color: '#4c9efa', fontSize: 12 }}>
                   Forgot Password
                 </Text>
-              </TouchableOpacity> */}
+              </TouchableOpacity>
             </View>
 
             {/* Login Button */}
