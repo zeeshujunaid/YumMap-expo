@@ -18,81 +18,80 @@ import * as ImagePicker from "expo-image-picker";
 import { auth, db } from "../../Utils/Firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import RestaurantTimingModal from '../../components/Timeselector';
+import RestaurantTimingModal from "../../components/Timeselector";
+import Toast from "react-native-toast-message";
+import { useRouter } from "expo-router";
 
 export default function RestaurantSignup({ navigation }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [restaurantTimings, setRestaurantTimings] = useState({});
+  const [restaurantTimings, setRestaurantTimings] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
+  // 📸 Select image from device
   const pickImage = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(
-        "Permission denied",
-        "Permission to access gallery is required!"
-      );
+    const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!granted) {
+      Toast.show({
+        type: "error",
+        text1: "Permission Denied",
+        text2: "You need to allow access to your photos to upload an image.",
+      });
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
       quality: 0.7,
     });
 
-    if (!result.canceled && result.assets.length > 0) {
+    if (!result.canceled && result.assets?.length > 0) {
       setSelectedImage(result.assets[0].uri);
     }
   };
 
+  // ☁️ Upload image to Cloudinary
   const uploadToCloudinary = async (imageUri) => {
-    const data = new FormData();
-    data.append("file", {
+    const formData = new FormData();
+    formData.append("file", {
       uri: imageUri,
       type: "image/jpeg",
       name: "restaurant.jpg",
     });
-    data.append("upload_preset", "YumMapPics");
-    data.append("cloud_name", "dudx3of1n");
+    formData.append("upload_preset", "YumMapPics");
+    formData.append("cloud_name", "dudx3of1n");
 
-    const response = await fetch(
-      "https://api.cloudinary.com/v1_1/dudx3of1n/image/upload",
-      {
-        method: "POST",
-        body: data,
-      }
-    );
+    const response = await fetch("https://api.cloudinary.com/v1_1/dudx3of1n/image/upload", {
+      method: "POST",
+      body: formData,
+    });
 
-    const file = await response.json();
-    return file.secure_url;
+    const data = await response.json();
+    if (!data.secure_url) throw new Error("Image upload failed");
+    return data.secure_url;
   };
 
+  // ✅ Form submission
   const handleSignup = async () => {
-    if (
-      !name ||
-      !email ||
-      !password ||
-      !phone ||
-      !restaurantTimings ||
-      !selectedImage
-    ) {
-      Alert.alert("Error", "Please fill in all fields");
+    if (!name || !email || !password || !phone || !restaurantTimings || !selectedImage) {
+     Toast.show({
+        type: "error",  
+        text1: "Incomplete Form",
+        text2: "Please fill all fields and select an image.",
+      });
       return;
     }
 
     setLoading(true);
     try {
       const imageUrl = await uploadToCloudinary(selectedImage);
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
 
       await setDoc(doc(db, "Restaurantdata", uid), {
@@ -101,27 +100,47 @@ export default function RestaurantSignup({ navigation }) {
         phone,
         timings: restaurantTimings,
         imageUrl,
+        createdAt: new Date().toISOString(),
+        uid,
+        role: 'Restaurant',
       });
 
-      Alert.alert("Success", "Restaurant registered successfully!");
-      navigation.navigate("MainApp");
+      Toast.show({
+        type: "success",
+        text1: "Signup Successful",
+        text2: "Your restaurant profile has been created.",
+      });
+
+
+      router.push("/(tabs)/Homescreen"); // Navigate to login after signup
+
+
+      setName("");
+      setEmail("");
+      setPassword("");
+      setPhone("");
+      setRestaurantTimings(null);
+      setSelectedImage(null);
+      setModalVisible(false); 
     } catch (err) {
       console.error(err);
-      Alert.alert("Signup Error", err.message);
+      Toast.show({
+        type: "error",
+        text1: "Signup Failed",
+        text2: err.message,
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
-    >
-    <StatusBar hidden/>
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+      <StatusBar hidden />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View style={{ flex: 1, backgroundColor: "#fff" }}>
+            {/* Header Image */}
             <View style={{ height: 250, overflow: "hidden" }}>
               <Image
                 source={
@@ -151,13 +170,14 @@ export default function RestaurantSignup({ navigation }) {
               )}
             </View>
 
+            {/* Camera Button */}
             <TouchableOpacity
               style={{
                 position: "absolute",
                 top: 170,
-                right: 2,
+                right: 10,
                 backgroundColor: "#fff",
-                borderRadius: 8,
+                borderRadius: 10,
               }}
               onPress={pickImage}
             >
@@ -167,6 +187,7 @@ export default function RestaurantSignup({ navigation }) {
               />
             </TouchableOpacity>
 
+            {/* Form Area */}
             <View
               style={{
                 backgroundColor: "#fff",
@@ -177,19 +198,10 @@ export default function RestaurantSignup({ navigation }) {
                 paddingHorizontal: 20,
               }}
             >
-              <Text
-                style={{
-                  fontSize: 22,
-                  fontWeight: "bold",
-                  color: "#FF4D4D",
-                  textAlign: "center",
-                }}
-              >
+              <Text style={{ fontSize: 22, fontWeight: "bold", color: "#FF4D4D", textAlign: "center" }}>
                 Restaurant Signup
               </Text>
-              <Text
-                style={{ textAlign: "center", color: "#999", marginTop: 5 }}
-              >
+              <Text style={{ textAlign: "center", color: "#999", marginTop: 5 }}>
                 Complete your restaurant profile
               </Text>
 
@@ -204,6 +216,7 @@ export default function RestaurantSignup({ navigation }) {
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
+                autoCapitalize="none"
                 style={styles.input}
               />
               <TextInput
@@ -221,18 +234,18 @@ export default function RestaurantSignup({ navigation }) {
                 style={styles.input}
               />
 
-              <Text>Select Opening Time</Text>
+              <Text style={{ marginBottom: 5 }}>Select Restaurant Timings:</Text>
               <TouchableOpacity
                 style={styles.input}
                 onPress={() => setModalVisible(true)}
               >
-                <Text>⏱ Set Timings</Text>
+                <Text>{restaurantTimings ? "🕒 Timings Set" : "⏱ Set Timings"}</Text>
               </TouchableOpacity>
 
               <RestaurantTimingModal
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
-                onSave={timings => {
+                onSave={(timings) => {
                   setRestaurantTimings(timings);
                   setModalVisible(false);
                 }}
@@ -241,13 +254,9 @@ export default function RestaurantSignup({ navigation }) {
               <TouchableOpacity
                 onPress={handleSignup}
                 disabled={loading}
-                style={[styles.button, loading && { opacity: 0.7 }]}
+                style={[styles.button, loading && { opacity: 0.6 }]}
               >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.buttonText}>Next</Text>
-                )}
+                {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Next</Text>}
               </TouchableOpacity>
             </View>
           </View>
