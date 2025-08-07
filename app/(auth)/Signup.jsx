@@ -11,6 +11,7 @@ import {
   Keyboard,
   Alert,
   ActivityIndicator,
+  StatusBar
 } from 'react-native';
 import React, { useState } from 'react';
 import { auth, db } from '../../Utils/Firebase';
@@ -60,6 +61,7 @@ export default function Signup() {
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        <StatusBar hidden />
           <View style={{ flex: 1, backgroundColor: '#fff', paddingHorizontal: 20, justifyContent: 'center', paddingVertical: 40 }}>
             {/* Logo Section */}
             <View style={{ alignItems: 'center', marginBottom: 10 }}>
@@ -110,7 +112,7 @@ export default function Signup() {
             </View>
 
             {/* Already Have Account & Restaurant Signup */}
-            <View style={{ flexDirection: 'row', marginTop: 20, width: '100%', justifyContent: 'space-around' }}>
+            <View style={{ flexDirection: 'row', marginTop: 20, width: '100%', justifyContent: 'space-around', gap:70, }}>
               <TouchableOpacity style={{ marginTop: 20 }} onPress={() => router.push('/(auth)/RestaurantSignup')}>
                 <Text style={{ color: '#FF4D4D', textAlign: 'center', fontSize: 12 }}>Signup as a Restaurant?</Text>
               </TouchableOpacity>
