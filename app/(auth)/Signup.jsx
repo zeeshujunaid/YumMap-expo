@@ -64,7 +64,8 @@ export default function Signup() {
 
       setEmail('');
       setPassword('');
-      router.push('/(auth)/Profilesignup'); // Navigate after success
+      router.push('/(tabs)/Homescreen');
+      // Navigate after success
     } catch (error) {
       console.error('Signup Error:', error);
       Toast.show({

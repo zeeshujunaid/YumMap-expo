@@ -43,7 +43,7 @@ export default function Login() {
         text1: 'Login Successful',
         text2: 'Welcome back!',
       });
-      router.push('/(tabs)/Home');
+      router.push('/(tabs)/Homescreen');
     } catch (error) {
       console.error('Login Error:', error);
       Toast.show({
