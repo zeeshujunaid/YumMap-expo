@@ -11,7 +11,7 @@ import {
   Keyboard,
   Alert,
   ActivityIndicator,
-  StatusBar
+  StatusBar,
 } from 'react-native';
 import React, { useState } from 'react';
 import { auth, db } from '../../Utils/Firebase';
@@ -19,16 +19,29 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
+
 export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-
   const handleSignup = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Toast.show({
+        type: 'error',
+        text1: 'Missing Fields',
+        text2: 'Please fill in all fields',
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      Toast.show({
+        type: 'error',
+        text1: 'Weak Password',
+        text2: 'Password must be at least 6 characters long',
+      });
       return;
     }
 
@@ -39,44 +52,67 @@ export default function Signup() {
 
       await setDoc(doc(db, 'users', uid), {
         email,
+        createdAt: new Date().toISOString(),
+        uid,
+        role: 'user', 
       });
 
-      Alert.alert('Success', 'Account created successfully!');
-      router.push('/(auth)/Profilesignup'); // Redirect to Login page after successful signup
+      Toast.show({
+        type: 'success',
+        text1: 'Account created successfully!',
+      });
+
       setEmail('');
       setPassword('');
+      router.push('/(auth)/Profilesignup'); // Navigate after success
     } catch (error) {
-      console.log('Signup Error:', error);
+      console.error('Signup Error:', error);
       Toast.show({
-        type: 'error',  
+        type: 'error',
         text1: 'Signup Failed',
         text2: error.message,
-        });
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+    >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
-        <StatusBar hidden />
-          <View style={{ flex: 1, backgroundColor: '#fff', paddingHorizontal: 20, justifyContent: 'center', paddingVertical: 40 }}>
-            {/* Logo Section */}
+          <StatusBar hidden />
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: '#fff',
+              paddingHorizontal: 20,
+              justifyContent: 'center',
+              paddingVertical: 40,
+            }}
+          >
+            {/* Logo */}
             <View style={{ alignItems: 'center', marginBottom: 10 }}>
-              <Image source={require('../../assets/images/YumMap.png')} style={{ height: 90, width: 80 }} />
+              <Image
+                source={require('../../assets/images/YumMap.png')}
+                style={{ height: 90, width: 80 }}
+              />
             </View>
 
-            {/* Welcome Section */}
+            {/* Welcome */}
             <View style={{ marginBottom: 30 }}>
-              <Text style={{ fontSize: 28, fontWeight: '600', color: '#000', textAlign: 'center' }}>Welcome</Text>
+              <Text style={{ fontSize: 28, fontWeight: '600', color: '#000', textAlign: 'center' }}>
+                Welcome
+              </Text>
               <Text style={{ fontSize: 16, color: '#666', textAlign: 'center', marginTop: 5 }}>
                 Please signup to enjoy the app
               </Text>
             </View>
 
-            {/* Input Fields */}
+            {/* Inputs */}
             <View style={{ gap: 15 }}>
               <Text style={{ fontSize: 16, color: '#000' }}>Email</Text>
               <TextInput
@@ -111,14 +147,22 @@ export default function Signup() {
               />
             </View>
 
-            {/* Already Have Account & Restaurant Signup */}
-            <View style={{ flexDirection: 'row', marginTop: 20, width: '100%', justifyContent: 'space-around', gap:70, }}>
-              <TouchableOpacity style={{ marginTop: 20 }} onPress={() => router.push('/(auth)/RestaurantSignup')}>
-                <Text style={{ color: '#FF4D4D', textAlign: 'center', fontSize: 12 }}>Signup as a Restaurant?</Text>
+            {/* Navigation Links */}
+            <View
+              style={{
+                flexDirection: 'row',
+                marginTop: 20,
+                justifyContent: 'space-around',
+                width: '100%',
+                gap: 60,
+              }}
+            >
+              <TouchableOpacity onPress={() => router.push('/(auth)/RestaurantSignup')}>
+                <Text style={{ color: '#FF4D4D', fontSize: 12 }}>Signup as a Restaurant?</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={{ marginTop: 20 }} onPress={() => router.push('/(auth)/Login')}>
-                <Text style={{ color: '#4c9efa', textAlign: 'center', fontSize: 12 }}>Already Have an Account?</Text>
+              <TouchableOpacity onPress={() => router.push('/(auth)/Login')}>
+                <Text style={{ color: '#4c9efa', fontSize: 12 }}>Already have an account?</Text>
               </TouchableOpacity>
             </View>
 
@@ -136,7 +180,14 @@ export default function Signup() {
               {loading ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <Text style={{ color: '#fff', textAlign: 'center', fontSize: 18, fontWeight: 'bold' }}>
+                <Text
+                  style={{
+                    color: '#fff',
+                    textAlign: 'center',
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                  }}
+                >
                   Sign Up
                 </Text>
               )}
