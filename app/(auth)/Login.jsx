@@ -9,59 +9,53 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
-import React, { useState } from 'react';
-import { auth } from '../../Utils/Firebase'; // ✅ Firebase Web SDK auth
+import { useState } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../Utils/Firebase'; // Make sure you initialize Firebase correctly in this file
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import Forgetpassword from '../../components/Forgotpassword';
 
-export default function Login({ navigation }) {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const [showForgotModal, setShowForgotModal] = useState(false);
+  const router = useRouter();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       Toast.show({
         type: 'error',
         text1: 'Error',
         text2: 'Please fill in all fields.',
-      })
+      });
       return;
     }
 
     setLoading(true);
-
-    auth
-      .signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        Toast.show({
-          type: 'success',
-          text1: 'Login Successful',
-          text2: 'Welcome back!',
-        });
-        router.push('/(tabs)/Home');
-        setEmail('');
-        setPassword('');
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Login Error:', error);
-        setLoading(false);
-        Toast.show({
-          type: 'error',
-          text1: 'Login Failed',
-          text2: error.message,
-        });
-        router.push('/(auth)/Login');
-        setEmail('');
-        setPassword('');
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      Toast.show({
+        type: 'success',
+        text1: 'Login Successful',
+        text2: 'Welcome back!',
       });
+      router.push('/(tabs)/Home');
+    } catch (error) {
+      console.error('Login Error:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Login Failed',
+        text2: error.message,
+      });
+    } finally {
+      setLoading(false);
+      setEmail('');
+      setPassword('');
+    }
   };
 
   return (
@@ -158,8 +152,8 @@ export default function Login({ navigation }) {
                 flexDirection: 'row',
                 justifyContent: 'space-around',
                 marginTop: 20,
-                gap:90,
-                width:"100%",
+                gap: 90,
+                width: '100%',
               }}
             >
               <TouchableOpacity onPress={() => router.push('/Signup')}>

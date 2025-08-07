@@ -11,31 +11,41 @@ import {
   Keyboard,
 } from 'react-native';
 import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../Utils/Firebase'; // Adjust path to your config
+import { auth } from '../Utils/Firebase'; // Adjust path as needed
 import Toast from 'react-native-toast-message';
 
-export default function ForgetPassword({ visible, onClose }) {
+export default function Forgetpassword({ visible, onClose }) {
   const [email, setEmail] = useState('');
 
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleResetPassword = async () => {
-    if (!email) return Alert.alert('Error', 'Please enter your email.');
-    if (!isValidEmail(email)) return Alert.alert('Invalid Email', 'Please enter a valid email address.');
+    if (!email) return Toast.show({
+      type: 'error',
+      text1: 'Empty Field',
+      text2: 'Please enter your email.',
+    });
+    if (!isValidEmail(email))
+      return Toast.show({
+        type: 'error',
+        text1: 'Invalid Email',
+        text2: 'Please enter a valid email address.',
+      });
 
     try {
       await sendPasswordResetEmail(auth, email);
       Toast.show({
         type: 'success',
-        text1: 'Password Reset Email Sent',
-        text2: 'Please check your inbox to reset your password.',
+        text1: 'Reset Link Sent',
+        text2: 'Please check your email to reset your password.',
       });
+      setEmail('');
     } catch (error) {
-      console.log('Password Reset Error:', error);
+      console.log(error);
       Toast.show({
         type: 'error',
-        text1: 'Error Sending Email',
-        text2: error.message || 'An error occurred while sending the reset email.',
+        text1: 'Error',
+        text2: error.message,
       });
     }
   };
@@ -45,7 +55,6 @@ export default function ForgetPassword({ visible, onClose }) {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            {/* Close Button */}
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Text style={styles.closeText}>×</Text>
             </TouchableOpacity>
