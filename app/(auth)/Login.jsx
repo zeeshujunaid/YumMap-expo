@@ -16,7 +16,7 @@ import React, { useState } from 'react';
 import { auth } from '../../Utils/Firebase'; // ✅ Firebase Web SDK auth
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
-// import Forgetpassword from '../components/forgetpassword';
+import Forgetpassword from '../../components/Forgotpassword';
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState('');
@@ -206,10 +206,10 @@ export default function Login({ navigation }) {
       </TouchableWithoutFeedback>
 
       {/* Forgot Password Modal */}
-      {/* <Forgetpassword
+      <Forgetpassword
         visible={showForgotModal}
         onClose={() => setShowForgotModal(false)}
-      /> */}
+      />
     </KeyboardAvoidingView>
   );
 }
