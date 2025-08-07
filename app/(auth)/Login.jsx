@@ -10,17 +10,17 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
-} from 'react-native';
-import { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../Utils/Firebase'; // Make sure you initialize Firebase correctly in this file
-import { useRouter } from 'expo-router';
-import Toast from 'react-native-toast-message';
-import Forgetpassword from '../../components/Forgotpassword';
+} from "react-native";
+import { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../Utils/Firebase"; // Make sure you initialize Firebase correctly in this file
+import { useRouter } from "expo-router";
+import Toast from "react-native-toast-message";
+import Forgetpassword from "../../components/Forgotpassword";
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showForgotModal, setShowForgotModal] = useState(false);
   const router = useRouter();
@@ -28,9 +28,9 @@ export default function Login() {
   const handleLogin = async () => {
     if (!email || !password) {
       Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Please fill in all fields.',
+        type: "error",
+        text1: "Error",
+        text2: "Please fill in all fields.",
       });
       return;
     }
@@ -39,28 +39,28 @@ export default function Login() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       Toast.show({
-        type: 'success',
-        text1: 'Login Successful',
-        text2: 'Welcome back!',
+        type: "success",
+        text1: "Login Successful",
+        text2: "Welcome back!",
       });
-      router.push('/(tabs)/Homescreen');
+      router.push("/(tabs)/Homescreen");
     } catch (error) {
-      console.error('Login Error:', error);
+      console.error("Login Error:", error);
       Toast.show({
-        type: 'error',
-        text1: 'Login Failed',
+        type: "error",
+        text1: "Login Failed",
         text2: error.message,
       });
     } finally {
       setLoading(false);
-      setEmail('');
-      setPassword('');
+      setEmail("");
+      setPassword("");
     }
   };
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -71,16 +71,16 @@ export default function Login() {
           <View
             style={{
               flex: 1,
-              backgroundColor: '#fff',
+              backgroundColor: "#fff",
               paddingHorizontal: 20,
-              justifyContent: 'center',
+              justifyContent: "center",
               paddingVertical: 40,
             }}
           >
             {/* Logo Section */}
-            <View style={{ alignItems: 'center', marginBottom: 30 }}>
+            <View style={{ alignItems: "center", marginBottom: 30 }}>
               <Image
-                source={require('../../assets/images/YumMap.png')}
+                source={require("../../assets/images/YumMap.png")}
                 style={{ height: 90, width: 80 }}
               />
             </View>
@@ -90,9 +90,9 @@ export default function Login() {
               <Text
                 style={{
                   fontSize: 28,
-                  fontWeight: '600',
-                  color: '#000',
-                  textAlign: 'center',
+                  fontWeight: "600",
+                  color: "#000",
+                  textAlign: "center",
                 }}
               >
                 Welcome Back
@@ -100,8 +100,8 @@ export default function Login() {
               <Text
                 style={{
                   fontSize: 12,
-                  color: '#666',
-                  textAlign: 'center',
+                  color: "#666",
+                  textAlign: "center",
                   marginTop: 5,
                 }}
               >
@@ -111,7 +111,7 @@ export default function Login() {
 
             {/* Input Fields */}
             <View style={{ gap: 15 }}>
-              <Text style={{ fontSize: 16, color: '#000' }}>Email</Text>
+              <Text style={{ fontSize: 16, color: "#000" }}>Email</Text>
               <TextInput
                 value={email}
                 onChangeText={setEmail}
@@ -120,14 +120,14 @@ export default function Login() {
                 autoCapitalize="none"
                 style={{
                   borderWidth: 1,
-                  borderColor: '#ccc',
+                  borderColor: "#ccc",
                   borderRadius: 10,
                   padding: 12,
                   fontSize: 16,
                 }}
               />
 
-              <Text style={{ fontSize: 16, color: '#000', marginTop: 15 }}>
+              <Text style={{ fontSize: 16, color: "#000", marginTop: 15 }}>
                 Password
               </Text>
               <TextInput
@@ -138,7 +138,7 @@ export default function Login() {
                 autoCapitalize="none"
                 style={{
                   borderWidth: 1,
-                  borderColor: '#ccc',
+                  borderColor: "#ccc",
                   borderRadius: 10,
                   padding: 12,
                   fontSize: 16,
@@ -149,21 +149,21 @@ export default function Login() {
             {/* Forgot & Signup Links */}
             <View
               style={{
-                flexDirection: 'row',
-                justifyContent: 'space-around',
+                flexDirection: "row",
+                justifyContent: "space-around",
                 marginTop: 20,
                 gap: 90,
-                width: '100%',
+                width: "100%",
               }}
             >
-              <TouchableOpacity onPress={() => router.push('/Signup')}>
-                <Text style={{ color: '#FF4D4D', fontSize: 12 }}>
+              <TouchableOpacity onPress={() => router.push("/Signup")}>
+                <Text style={{ color: "#FF4D4D", fontSize: 12 }}>
                   Don’t have an account?
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={() => setShowForgotModal(true)}>
-                <Text style={{ color: '#4c9efa', fontSize: 12 }}>
+                <Text style={{ color: "#4c9efa", fontSize: 12 }}>
                   Forgot Password
                 </Text>
               </TouchableOpacity>
@@ -174,11 +174,11 @@ export default function Login() {
               onPress={handleLogin}
               disabled={loading}
               style={{
-                backgroundColor: '#FF4D4D',
+                backgroundColor: "#FF4D4D",
                 paddingVertical: 14,
                 borderRadius: 10,
                 marginTop: 30,
-                alignItems: 'center',
+                alignItems: "center",
               }}
             >
               {loading ? (
@@ -186,14 +186,62 @@ export default function Login() {
               ) : (
                 <Text
                   style={{
-                    color: '#fff',
-                    fontSize: 18,
-                    fontWeight: 'bold',
+                    color: "#fff",
+                    fontSize: 20,
+                    fontWeight: "bold",
                   }}
                 >
-                  Login
+                  Sign In
                 </Text>
               )}
+            </TouchableOpacity>
+
+            <View
+              style={{
+                marginVertical: 20,
+                alignItems: "center",
+                marginTop: 40,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  width: "80%",
+                }}
+              >
+                <View style={{ flex: 1, height: 1, backgroundColor: "#ccc" }} />
+                <Text style={{ marginHorizontal: 10, color: "#888" }}>
+                  or
+                </Text>
+                <View style={{ flex: 1, height: 1, backgroundColor: "#ccc" }} />
+              </View>
+            </View>
+
+            {/* Google Sign-In Button */}
+
+            <TouchableOpacity
+              // onPress={handleGoogleLogin}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                paddingVertical: 10,
+                paddingHorizontal: 20,
+                borderWidth: 1,
+                borderColor: "#ccc",
+                borderRadius: 10,
+                marginTop: 20,
+                backgroundColor: "white",
+              }}
+            >
+              <Image
+                source={require("../../assets/images/google.png")} // ✅ Replace with only G icon image
+                style={{ width: 20, height: 20, marginRight: 10 }}
+              />
+              <Text style={{ fontSize: 16, fontWeight: "bold", color: "#000" }}>
+                Sign in with Google
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

@@ -7,7 +7,6 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert,
   ScrollView,
   TouchableOpacity,
   TextInput,
@@ -79,11 +78,20 @@ export default function RestaurantSignup({ navigation }) {
 
   // ✅ Form submission
   const handleSignup = async () => {
-    if (!name || !email || !password || !phone || !restaurantTimings || !selectedImage) {
+    if (!name || !email || !password || !phone || !restaurantTimings ) {
      Toast.show({
         type: "error",  
         text1: "Incomplete Form",
         text2: "Please fill all fields and select an image.",
+      });
+      return;
+    }
+
+    if (!selectedImage) {
+      Toast.show({
+        type: "error",
+        text1: "Image Required",
+        text2: "Please select a restaurant image.",
       });
       return;
     }
@@ -94,7 +102,7 @@ export default function RestaurantSignup({ navigation }) {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
 
-      await setDoc(doc(db, "Restaurantdata", uid), {
+      await setDoc(doc(db, "Resturantdata", uid), {
         name,
         email,
         phone,
@@ -112,7 +120,7 @@ export default function RestaurantSignup({ navigation }) {
       });
 
 
-      router.push("/(tabs)/Homescreen"); // Navigate to login after signup
+      router.push("/(tabs)/Homescreen"); 
 
 
       setName("");

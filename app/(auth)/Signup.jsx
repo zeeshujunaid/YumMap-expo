@@ -9,11 +9,10 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert,
   ActivityIndicator,
   StatusBar,
 } from 'react-native';
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { auth, db } from '../../Utils/Firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -192,6 +191,55 @@ export default function Signup() {
                   Sign Up
                 </Text>
               )}
+            </TouchableOpacity>
+
+
+            <View
+              style={{
+                marginVertical: 20,
+                alignItems: "center",
+                marginTop: 40,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  width: "80%",
+                }}
+              >
+                <View style={{ flex: 1, height: 1, backgroundColor: "#ccc" }} />
+                <Text style={{ marginHorizontal: 10, color: "#888" }}>
+                  or
+                </Text>
+                <View style={{ flex: 1, height: 1, backgroundColor: "#ccc" }} />
+              </View>
+            </View>
+
+            {/* Google Sign-In Button */}
+
+            <TouchableOpacity
+              // onPress={handleGoogleLogin}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                paddingVertical: 10,
+                paddingHorizontal: 20,
+                borderWidth: 1,
+                borderColor: "#ccc",
+                borderRadius: 10,
+                marginTop: 20,
+                backgroundColor: "white",
+              }}
+            >
+              <Image
+                source={require("../../assets/images/google.png")} // ✅ Replace with only G icon image
+                style={{ width: 20, height: 20, marginRight: 10 }}
+              />
+              <Text style={{ fontSize: 16, fontWeight: "bold", color: "#000" }}>
+                Sign up with Google
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
