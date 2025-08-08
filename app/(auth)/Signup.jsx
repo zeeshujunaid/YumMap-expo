@@ -63,7 +63,7 @@ export default function Signup() {
 
       setEmail('');
       setPassword('');
-      router.push('/(tabs)/Homescreen');
+      router.push('/(auth)/Profilesignup');
       // Navigate after success
     } catch (error) {
       console.error('Signup Error:', error);

@@ -1,3 +1,4 @@
+// screens/RestaurantSignup.js
 import React, { useState } from "react";
 import {
   View,
@@ -18,10 +19,11 @@ import { auth, db } from "../../Utils/Firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import RestaurantTimingModal from "../../components/Timeselector";
+import LocationSelectorModal from "../../components/Locationselector";
 import Toast from "react-native-toast-message";
 import { useRouter } from "expo-router";
 
-export default function RestaurantSignup({ navigation }) {
+export default function RestaurantSignup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,9 +32,12 @@ export default function RestaurantSignup({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [locationModalVisible, setLocationModalVisible] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [showDoneButton, setShowDoneButton] = useState(false);
+
   const router = useRouter();
 
-  // 📸 Select image from device
   const pickImage = async () => {
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!granted) {
@@ -55,7 +60,6 @@ export default function RestaurantSignup({ navigation }) {
     }
   };
 
-  // ☁️ Upload image to Cloudinary
   const uploadToCloudinary = async (imageUri) => {
     const formData = new FormData();
     formData.append("file", {
@@ -76,13 +80,12 @@ export default function RestaurantSignup({ navigation }) {
     return data.secure_url;
   };
 
-  // ✅ Form submission
   const handleSignup = async () => {
-    if (!name || !email || !password || !phone || !restaurantTimings ) {
-     Toast.show({
-        type: "error",  
+    if (!name || !email || !password || !phone || !restaurantTimings || !selectedLocation) {
+      Toast.show({
+        type: "error",
         text1: "Incomplete Form",
-        text2: "Please fill all fields and select an image.",
+        text2: "Fill all fields and select location & image.",
       });
       return;
     }
@@ -108,9 +111,10 @@ export default function RestaurantSignup({ navigation }) {
         phone,
         timings: restaurantTimings,
         imageUrl,
+        location: selectedLocation,
         createdAt: new Date().toISOString(),
         uid,
-        role: 'Restaurant',
+        role: "Restaurant",
       });
 
       Toast.show({
@@ -119,9 +123,7 @@ export default function RestaurantSignup({ navigation }) {
         text2: "Your restaurant profile has been created.",
       });
 
-
-      router.push("/(tabs)/Homescreen"); 
-
+      router.push("/(tabs)/Homescreen");
 
       setName("");
       setEmail("");
@@ -129,7 +131,8 @@ export default function RestaurantSignup({ navigation }) {
       setPhone("");
       setRestaurantTimings(null);
       setSelectedImage(null);
-      setModalVisible(false); 
+      setSelectedLocation(null);
+      setModalVisible(false);
     } catch (err) {
       console.error(err);
       Toast.show({
@@ -213,40 +216,13 @@ export default function RestaurantSignup({ navigation }) {
                 Complete your restaurant profile
               </Text>
 
-              <TextInput
-                placeholder="Restaurant Name"
-                value={name}
-                onChangeText={setName}
-                style={styles.input}
-              />
-              <TextInput
-                placeholder="Restaurant Email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                style={styles.input}
-              />
-              <TextInput
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                style={styles.input}
-              />
-              <TextInput
-                placeholder="Phone Number"
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                style={styles.input}
-              />
+              <TextInput placeholder="Restaurant Name" value={name} onChangeText={setName} style={styles.input} />
+              <TextInput placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" style={styles.input} />
+              <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
+              <TextInput placeholder="Phone Number" value={phone} onChangeText={setPhone} keyboardType="phone-pad" style={styles.input} />
 
               <Text style={{ marginBottom: 5 }}>Select Restaurant Timings:</Text>
-              <TouchableOpacity
-                style={styles.input}
-                onPress={() => setModalVisible(true)}
-              >
+              <TouchableOpacity style={styles.input} onPress={() => setModalVisible(true)}>
                 <Text>{restaurantTimings ? "🕒 Timings Set" : "⏱ Set Timings"}</Text>
               </TouchableOpacity>
 
@@ -260,16 +236,37 @@ export default function RestaurantSignup({ navigation }) {
               />
 
               <TouchableOpacity
-                onPress={handleSignup}
+                onPress={() => {
+                  if (!showDoneButton) {
+                    setLocationModalVisible(true);
+                  } else {
+                    handleSignup();
+                  }
+                }}
                 disabled={loading}
                 style={[styles.button, loading && { opacity: 0.6 }]}
               >
-                {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Next</Text>}
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>{showDoneButton ? "Done" : "Next"}</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>
+
+      {/* Location Picker Modal */}
+      <LocationSelectorModal
+        visible={locationModalVisible}
+        onClose={() => setLocationModalVisible(false)}
+        onSelectLocation={(location) => {
+          setSelectedLocation(location);
+          setShowDoneButton(true);
+          setLocationModalVisible(false);
+        }}
+      />
     </KeyboardAvoidingView>
   );
 }
