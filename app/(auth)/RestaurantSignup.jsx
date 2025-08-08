@@ -70,10 +70,13 @@ export default function RestaurantSignup() {
     formData.append("upload_preset", "YumMapPics");
     formData.append("cloud_name", "dudx3of1n");
 
-    const response = await fetch("https://api.cloudinary.com/v1_1/dudx3of1n/image/upload", {
-      method: "POST",
-      body: formData,
-    });
+    const response = await fetch(
+      "https://api.cloudinary.com/v1_1/dudx3of1n/image/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
 
     const data = await response.json();
     if (!data.secure_url) throw new Error("Image upload failed");
@@ -81,7 +84,14 @@ export default function RestaurantSignup() {
   };
 
   const handleSignup = async () => {
-    if (!name || !email || !password || !phone || !restaurantTimings || !selectedLocation) {
+    if (
+      !name ||
+      !email ||
+      !password ||
+      !phone ||
+      !restaurantTimings ||
+      !selectedLocation
+    ) {
       Toast.show({
         type: "error",
         text1: "Incomplete Form",
@@ -100,12 +110,22 @@ export default function RestaurantSignup() {
     }
 
     setLoading(true);
+
     try {
+      // 1. Upload image to Cloudinary
       const imageUrl = await uploadToCloudinary(selectedImage);
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+      // 2. Create Firebase Auth user
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const uid = userCredential.user.uid;
 
-      await setDoc(doc(db, "Resturantdata", uid), {
+      // 3. Common data to save in both collections
+      const restaurantData = {
+        uid,
         name,
         email,
         phone,
@@ -113,18 +133,26 @@ export default function RestaurantSignup() {
         imageUrl,
         location: selectedLocation,
         createdAt: new Date().toISOString(),
-        uid,
         role: "Restaurant",
-      });
+      };
 
+      // 4. Save to 'Resturantdata' collection
+      await setDoc(doc(db, "Resturantdata", uid), restaurantData);
+
+      // 5. Save to 'users' collection
+      await setDoc(doc(db, "users", uid), restaurantData);
+
+      // 6. Show success message
       Toast.show({
         type: "success",
         text1: "Signup Successful",
         text2: "Your restaurant profile has been created.",
       });
 
+      // 7. Navigate to Home screen
       router.push("/(tabs)/Homescreen");
 
+      // 8. Reset form
       setName("");
       setEmail("");
       setPassword("");
@@ -133,12 +161,13 @@ export default function RestaurantSignup() {
       setSelectedImage(null);
       setSelectedLocation(null);
       setModalVisible(false);
+      setShowDoneButton(false);
     } catch (err) {
-      console.error(err);
+      console.error("Signup Error:", err);
       Toast.show({
         type: "error",
         text1: "Signup Failed",
-        text2: err.message,
+        text2: err.message || "Something went wrong",
       });
     } finally {
       setLoading(false);
@@ -146,7 +175,10 @@ export default function RestaurantSignup() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
       <StatusBar hidden />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -209,21 +241,60 @@ export default function RestaurantSignup() {
                 paddingHorizontal: 20,
               }}
             >
-              <Text style={{ fontSize: 22, fontWeight: "bold", color: "#FF4D4D", textAlign: "center" }}>
+              <Text
+                style={{
+                  fontSize: 22,
+                  fontWeight: "bold",
+                  color: "#FF4D4D",
+                  textAlign: "center",
+                }}
+              >
                 Restaurant Signup
               </Text>
-              <Text style={{ textAlign: "center", color: "#999", marginTop: 5 }}>
+              <Text
+                style={{ textAlign: "center", color: "#999", marginTop: 5 }}
+              >
                 Complete your restaurant profile
               </Text>
 
-              <TextInput placeholder="Restaurant Name" value={name} onChangeText={setName} style={styles.input} />
-              <TextInput placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" style={styles.input} />
-              <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
-              <TextInput placeholder="Phone Number" value={phone} onChangeText={setPhone} keyboardType="phone-pad" style={styles.input} />
+              <TextInput
+                placeholder="Restaurant Name"
+                value={name}
+                onChangeText={setName}
+                style={styles.input}
+              />
+              <TextInput
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                style={styles.input}
+              />
+              <TextInput
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                style={styles.input}
+              />
+              <TextInput
+                placeholder="Phone Number"
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+                style={styles.input}
+              />
 
-              <Text style={{ marginBottom: 5 }}>Select Restaurant Timings:</Text>
-              <TouchableOpacity style={styles.input} onPress={() => setModalVisible(true)}>
-                <Text>{restaurantTimings ? "🕒 Timings Set" : "⏱ Set Timings"}</Text>
+              <Text style={{ marginBottom: 5 }}>
+                Select Restaurant Timings:
+              </Text>
+              <TouchableOpacity
+                style={styles.input}
+                onPress={() => setModalVisible(true)}
+              >
+                <Text>
+                  {restaurantTimings ? "🕒 Timings Set" : "⏱ Set Timings"}
+                </Text>
               </TouchableOpacity>
 
               <RestaurantTimingModal
@@ -249,7 +320,9 @@ export default function RestaurantSignup() {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.buttonText}>{showDoneButton ? "Done" : "Next"}</Text>
+                  <Text style={styles.buttonText}>
+                    {showDoneButton ? "Done" : "Next"}
+                  </Text>
                 )}
               </TouchableOpacity>
             </View>

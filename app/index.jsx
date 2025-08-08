@@ -51,7 +51,7 @@ export default function Index() {
         Toast.show({
           type: "success",
           text1: "Welcome back!",
-          text2: `Hello, ${user.displayName || "User"}!`,
+          text2: `Hello, ${user.name || "User"}!`,
         });
         router.replace("/(tabs)/Homescreen");
       } else {
