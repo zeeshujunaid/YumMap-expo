@@ -6,13 +6,12 @@ import {
   Animated,
   StyleSheet,
   StatusBar,
-  Image,
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { useRouter } from "expo-router";
 import { getDocs, collection } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "../Utils/Firebase"; // ✅ Correct import
+import { auth, db } from "../Utils/Firebase";
 import { RestaurantContext } from "../context/Restaurantcontext";
 
 export default function Index() {
@@ -20,60 +19,56 @@ export default function Index() {
   const logoScale = useRef(new Animated.Value(1.8)).current;
   const { setrestaurantdata } = useContext(RestaurantContext);
 
+  // ✅ Fetch restaurant data
+  const fetchRestaurantData = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "Resturantdata"));
+      const restaurants = [];
+      querySnapshot.forEach((doc) =>
+        restaurants.push({ id: doc.id, ...doc.data() })
+      );
+
+      setrestaurantdata(restaurants);
+
+      console.log("🍽️ Restaurant data fetched:", restaurants);
+    } catch (error) {
+      console.error("❌ Error fetching restaurant data:", error);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Failed to fetch restaurant data.",
+      });
+    }
+  };
+
+  // ✅ Auth check + navigate
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // ✅ Fetch restaurant data from Firestore
-        const querySnapshot = await getDocs(collection(db, "Resturantdata"));
-        const Resturantdata = [];
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      await fetchRestaurantData();
 
-        querySnapshot.forEach((doc) => {
-          Resturantdata.push({ id: doc.id, ...doc.data() });
-        });
-
-        if (Resturantdata.length > 0) {
-          console.log("Restaurant data fetched:", Resturantdata);
-          setrestaurantdata(Resturantdata);
-        }
-
-        // ✅ Check auth state
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            console.log("User signed in:", user);
-
-            Toast.show({
-              type: "success",
-              text1: "Welcome back!",
-              text2: `Hello, ${user.displayName || "User"}!`,
-            });
-
-            router.push("/(tabs)/Home");
-          } else {
-            console.log("No user is signed in.");
-            Toast.show({
-              type: "error",
-              text1: "Not Signed In",
-              text2: "Please sign in to continue.",
-            });
-
-            router.push("/(auth)/Login");
-          }
-        });
-      } catch (error) {
-        console.error("Error fetching restaurant data:", error);
+      if (user) {
+        console.log("✅ User signed in:", user);
         Toast.show({
-          type: "error",
-          text1: "Error",
-          text2: "Failed to fetch restaurant data.",
+          type: "success",
+          text1: "Welcome back!",
+          text2: `Hello, ${user.displayName || "User"}!`,
         });
-        router.push("/(auth)/Login");
+        router.replace("/(tabs)/Homescreen");
+      } else {
+        console.log("🚫 No user signed in.");
+        Toast.show({
+          type: "info",
+          text1: "Please sign in",
+          text2: "Redirecting to login...",
+        });
+        router.replace("/(auth)/Login");
       }
-    };
+    });
 
-    fetchData();
+    return () => unsubscribe();
   }, []);
 
-  // ✅ Animate logo scale
+  // ✅ Logo animation
   useEffect(() => {
     Animated.spring(logoScale, {
       toValue: 1,
