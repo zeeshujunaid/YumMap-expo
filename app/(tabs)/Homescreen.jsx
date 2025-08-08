@@ -10,7 +10,7 @@ export default function HomeScreen() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      router.replace('/'); // redirect to login/onboarding screen
+      router.push('/(auth)/Login'); // redirect to login/onboarding screen
     } catch (error) {
       console.log('Logout Error:', error);
     }

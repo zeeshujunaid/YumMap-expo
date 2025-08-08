@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useContext } from "react";
+import React, { useEffect, useRef, useContext, use } from "react";
 import {
   View,
   Text,
@@ -20,54 +20,59 @@ export default function Index() {
   const { setrestaurantdata } = useContext(RestaurantContext);
 
   // ✅ Fetch restaurant data
-  const fetchRestaurantData = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "Resturantdata"));
-      const restaurants = [];
-      querySnapshot.forEach((doc) =>
-        restaurants.push({ id: doc.id, ...doc.data() })
-      );
+  // const fetchRestaurantData = async () => {
+  //   try {
+  //     const querySnapshot = await getDocs(collection(db, "Resturantdata"));
+  //     const restaurants = [];
+  //     querySnapshot.forEach((doc) =>
+  //       restaurants.push({ id: doc.id, ...doc.data() })
+  //     );
 
-      setrestaurantdata(restaurants);
+  //     setrestaurantdata(restaurants);
 
-      console.log("🍽️ Restaurant data fetched:", restaurants);
-    } catch (error) {
-      console.error("❌ Error fetching restaurant data:", error);
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Failed to fetch restaurant data.",
-      });
-    }
-  };
+  //     console.log("🍽️ Restaurant data fetched:", restaurants);
+  //   } catch (error) {
+  //     console.error("❌ Error fetching restaurant data:", error);
+  //     Toast.show({
+  //       type: "error",
+  //       text1: "Error",
+  //       text2: "Failed to fetch restaurant data.",
+  //     });
+  //   }
+  // };
 
-  // ✅ Auth check + navigate
+  // // ✅ Auth check + navigate
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(auth, async (user) => {
+  //     await fetchRestaurantData();
+
+  //     if (user) {
+  //       console.log("✅ User signed in:", user);
+  //       Toast.show({
+  //         type: "success",
+  //         text1: "Welcome back!",
+  //         text2: `Hello, ${user.name || "User"}!`,
+  //       });
+  //       router.replace("/(tabs)/Homescreen");
+  //     } else {
+  //       console.log("🚫 No user signed in.");
+  //       Toast.show({
+  //         type: "info",
+  //         text1: "Please sign in",
+  //         text2: "Redirecting to login...",
+  //       });
+  //       router.replace("/(auth)/Login");
+  //     }
+  //   });
+
+  //   return () => unsubscribe();
+  // }, []);
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      await fetchRestaurantData();
-
-      if (user) {
-        console.log("✅ User signed in:", user);
-        Toast.show({
-          type: "success",
-          text1: "Welcome back!",
-          text2: `Hello, ${user.name || "User"}!`,
-        });
-        router.replace("/(tabs)/Homescreen");
-      } else {
-        console.log("🚫 No user signed in.");
-        Toast.show({
-          type: "info",
-          text1: "Please sign in",
-          text2: "Redirecting to login...",
-        });
-        router.replace("/(auth)/Login");
-      }
-    });
-
-    return () => unsubscribe();
+    setTimeout(() => {
+      router.replace("/(tabs)/Profilescreen");
+    }, 3000);
   }, []);
-
   // ✅ Logo animation
   useEffect(() => {
     Animated.spring(logoScale, {

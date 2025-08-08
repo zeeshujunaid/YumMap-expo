@@ -47,9 +47,30 @@ export default function LocationSelectorModal({ visible, onClose, onSelectLocati
     setLocation({ latitude, longitude });
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (location && onSelectLocation) {
-      onSelectLocation(location);
+      try {
+        // Reverse geocode to get address
+        const [address] = await Location.reverseGeocodeAsync({
+          latitude: location.latitude,
+          longitude: location.longitude,
+        });
+
+        const fullAddress = `${address.name || ""} ${address.street || ""}, ${address.city || ""}, ${address.region || ""}, ${address.country || ""}`.trim();
+
+        // Send both location and address
+        onSelectLocation({
+          latitude: location.latitude,
+          longitude: location.longitude,
+          address: fullAddress,
+        });
+
+        onClose(); // close modal after selecting
+      } catch (error) {
+        console.error("Error getting address:", error);
+        onSelectLocation(location); // fallback to just coords
+        onClose();
+      }
     }
   };
 
@@ -57,9 +78,9 @@ export default function LocationSelectorModal({ visible, onClose, onSelectLocati
     <Modal visible={visible} animationType="slide">
       <MapView
         style={StyleSheet.absoluteFillObject}
-        initialRegion={initialRegion}  // <-- free to move after initial load
+        initialRegion={initialRegion}
         onPress={handleMapPress}
-        showsUserLocation={true}       // Shows blue dot for current location
+        showsUserLocation={true}
       >
         {location && <Marker coordinate={location} />}
       </MapView>
