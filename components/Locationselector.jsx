@@ -1,5 +1,5 @@
 // components/LocationSelectorModal.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Modal, View, Button, StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
@@ -12,6 +12,8 @@ export default function LocationSelectorModal({ visible, onClose, onSelectLocati
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
+
+  const mapRef = useRef(null); // ✅ to control map programmatically
 
   useEffect(() => {
     if (!visible) return;
@@ -30,6 +32,18 @@ export default function LocationSelectorModal({ visible, onClose, onSelectLocati
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         });
+
+        // ✅ Move/Zoom map instantly to location
+        setTimeout(() => {
+          if (mapRef.current) {
+            mapRef.current.animateToRegion({
+              ...coords,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            }, 1000);
+          }
+        }, 500);
+
       } else {
         setLocation(null);
         setInitialRegion({
@@ -50,33 +64,47 @@ export default function LocationSelectorModal({ visible, onClose, onSelectLocati
   const handleConfirm = async () => {
     if (location && onSelectLocation) {
       try {
-        // Reverse geocode to get address
-        const [address] = await Location.reverseGeocodeAsync({
-          latitude: location.latitude,
-          longitude: location.longitude,
-        });
+        const [address] = await Location.reverseGeocodeAsync(location);
 
         const fullAddress = `${address.name || ""} ${address.street || ""}, ${address.city || ""}, ${address.region || ""}, ${address.country || ""}`.trim();
 
-        // Send both location and address
         onSelectLocation({
           latitude: location.latitude,
           longitude: location.longitude,
           address: fullAddress,
         });
 
-        onClose(); // close modal after selecting
+        onClose();
       } catch (error) {
         console.error("Error getting address:", error);
-        onSelectLocation(location); // fallback to just coords
+        onSelectLocation(location);
         onClose();
       }
+    }
+  };
+
+  // ✅ Get my exact location again
+  const handleGetMyLocation = async () => {
+    const loc = await Location.getCurrentPositionAsync({});
+    const coords = {
+      latitude: loc.coords.latitude,
+      longitude: loc.coords.longitude,
+    };
+    setLocation(coords);
+
+    if (mapRef.current) {
+      mapRef.current.animateToRegion({
+        ...coords,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }, 1000);
     }
   };
 
   return (
     <Modal visible={visible} animationType="slide">
       <MapView
+        ref={mapRef}
         style={StyleSheet.absoluteFillObject}
         initialRegion={initialRegion}
         onPress={handleMapPress}
@@ -86,8 +114,9 @@ export default function LocationSelectorModal({ visible, onClose, onSelectLocati
       </MapView>
 
       <View style={styles.controls}>
-        <Button title="✅ Confirm Location" onPress={handleConfirm} color="#fff" />
-        <Button title="❌ Cancel" onPress={onClose} color="#ccc" />
+        <Button title="📍 Get My Location" onPress={handleGetMyLocation} color="#4CAF50" />
+        <Button title="✅ Confirm Location" onPress={handleConfirm} color="#2196F3" />
+        <Button title="❌ Cancel" onPress={onClose} color="#F44336" />
       </View>
     </Modal>
   );
