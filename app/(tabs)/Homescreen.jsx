@@ -139,8 +139,9 @@ export default function HomeScreen() {
               }}
             >
               <View style={styles.markerContainer}>
-                  <Image source={{ uri: rest.imageUrl }} style={{ width: "100%", height: "100%", borderRadius: 25 }} />
-                  <Text
+                  <Image source={{ uri: rest.imageUrl }} style={{ width: 50, height: 50, borderRadius: 25 }} />
+                {/* <View style={styles.bubble}> */}
+                  {/* <Text
                     style={styles.name}
                     numberOfLines={1}
                     ellipsizeMode="tail"
@@ -153,8 +154,7 @@ export default function HomeScreen() {
                     ellipsizeMode="tail"
                   >
                     {rest.phone || "No phone"}
-                  </Text>
-                {/* <View style={styles.bubble}> */}
+                  </Text> */}
                 {/* </View> */}
                 {/* <View style={styles.arrowBorder} />
                 <View style={styles.arrow} /> */}
@@ -171,18 +171,16 @@ const styles = StyleSheet.create({
 
   markerContainer: {
   // alignItems: "center",
-  justifyContent: "center",
-  backgroundColor: "#000",
-  // height:"100%",
-  height:200,
-  width: 200,
-  // width: "100%",
+  // backgroundColor: "#000",
 },
 
 bubble: {
+  justifyContent: "center",
+  height:"100%",
+  width: "100%",
   alignItems: "center",
   backgroundColor: "white",
-  borderRadius: 8,
+  // borderRadius: 8,
   borderColor: "#ccc",
   borderWidth: 0.5,
   shadowColor: "#000",
@@ -190,8 +188,6 @@ bubble: {
   shadowOpacity: 0.3,
   shadowRadius: 2,
   elevation: 3,
-  alignItems: "center", // center content horizontally
-  justifyContent: "center", // center vertically (if needed)
 },
 
 
