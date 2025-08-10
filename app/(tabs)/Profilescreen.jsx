@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
   ActivityIndicator,
-  Image,
-  TouchableOpacity,
-  TextInput,
   StatusBar,
 } from "react-native";
 import { auth, db } from "../../Utils/Firebase"; // Make sure this points to your Firebase config

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useContext, use } from "react";
+import React, { useEffect, useRef, useContext } from "react";
 import {
   View,
   Text,
@@ -17,63 +17,59 @@ import { RestaurantContext } from "../context/Restaurantcontext";
 export default function Index() {
   const router = useRouter();
   const logoScale = useRef(new Animated.Value(1.8)).current;
-  const { setrestaurantdata } = useContext(RestaurantContext);
+  const { setRestaurantData } = useContext(RestaurantContext); // Correct camelCase here
 
-  // ✅ Fetch restaurant data
-  // const fetchRestaurantData = async () => {
-  //   try {
-  //     const querySnapshot = await getDocs(collection(db, "Resturantdata"));
-  //     const restaurants = [];
-  //     querySnapshot.forEach((doc) =>
-  //       restaurants.push({ id: doc.id, ...doc.data() })
-  //     );
+  // Fetch restaurant data and save to context
+  const fetchRestaurantData = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "Resturantdata"));
+      const restaurants = [];
+      querySnapshot.forEach((doc) =>
+        restaurants.push({ id: doc.id, ...doc.data() })
+      );
 
-  //     setrestaurantdata(restaurants);
+      setRestaurantData(restaurants); // Use correct function name
+      console.log("🍽️ Restaurant data fetched:", restaurants);
+    } catch (error) {
+      console.error("❌ Error fetching restaurant data:", error);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Failed to fetch restaurant data.",
+      });
+    }
+  };
 
-  //     console.log("🍽️ Restaurant data fetched:", restaurants);
-  //   } catch (error) {
-  //     console.error("❌ Error fetching restaurant data:", error);
-  //     Toast.show({
-  //       type: "error",
-  //       text1: "Error",
-  //       text2: "Failed to fetch restaurant data.",
-  //     });
-  //   }
-  // };
-
-  // // ✅ Auth check + navigate
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, async (user) => {
-  //     await fetchRestaurantData();
-
-  //     if (user) {
-  //       console.log("✅ User signed in:", user);
-  //       Toast.show({
-  //         type: "success",
-  //         text1: "Welcome back!",
-  //         text2: `Hello, ${user.name || "User"}!`,
-  //       });
-  //       router.replace("/(tabs)/Homescreen");
-  //     } else {
-  //       console.log("🚫 No user signed in.");
-  //       Toast.show({
-  //         type: "info",
-  //         text1: "Please sign in",
-  //         text2: "Redirecting to login...",
-  //       });
-  //       router.replace("/(auth)/Login");
-  //     }
-  //   });
-
-  //   return () => unsubscribe();
-  // }, []);
-
+  // Auth check + fetch data + wait 5 seconds before navigating
   useEffect(() => {
-    setTimeout(() => {
-      router.replace("/(tabs)/Profilescreen");
-    }, 3000);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      await fetchRestaurantData();
+
+      setTimeout(() => {
+        if (user) {
+          console.log("✅ User signed in:", user);
+          Toast.show({
+            type: "success",
+            text1: "Welcome back!",
+            text2: `Hello, ${user.displayName || "User"}!`,
+          });
+          router.replace("/(tabs)/Homescreen");
+        } else {
+          console.log("🚫 No user signed in.");
+          Toast.show({
+            type: "info",
+            text1: "Please sign in",
+            text2: "Redirecting to login...",
+          });
+          router.replace("/(auth)/Login");
+        }
+      }, 5000); // wait 5 seconds
+    });
+
+    return () => unsubscribe();
   }, []);
-  // ✅ Logo animation
+
+  // Logo animation effect
   useEffect(() => {
     Animated.spring(logoScale, {
       toValue: 1,
@@ -90,7 +86,6 @@ export default function Index() {
     >
       <StatusBar hidden />
       <View style={styles.overlay} />
-
       <View style={styles.container}>
         <Animated.Image
           source={require("../assets/images/YumMap.png")}
@@ -104,9 +99,7 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-  },
+  background: { flex: 1 },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.6)",
