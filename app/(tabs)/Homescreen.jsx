@@ -1,10 +1,16 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
-import { StyleSheet, View, Text ,Image} from "react-native";
+import {
+  StyleSheet,
+  View,
+  Image,
+  StatusBar,
+  TouchableOpacity,
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { RestaurantContext } from "../../context/Restaurantcontext";
+import { Ionicons } from "@expo/vector-icons"; // Make sure to import this
 
-// Minimal map style (optional)
 const minimalMapStyle = [
   {
     featureType: "all",
@@ -33,17 +39,40 @@ export default function HomeScreen() {
 
   const mapRef = useRef(null);
 
-  useEffect(() => {
-    (async () => {
+  // ✅ New reusable function
+  const fetchLocation = async () => {
+    try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === "granted") {
-        const loc = await Location.getCurrentPositionAsync({});
-        setLocation({
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude,
-        });
+      if (status !== "granted") {
+        alert("Permission to access location was denied");
+        return;
       }
-    })();
+
+      const loc = await Location.getCurrentPositionAsync({});
+      const coords = {
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      };
+      setLocation(coords);
+
+      // Zoom map to new location
+      if (mapRef.current) {
+        mapRef.current.animateToRegion(
+          {
+            ...coords,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          },
+          1000
+        );
+      }
+    } catch (error) {
+      console.error("Error getting location:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLocation();
   }, []);
 
   useEffect(() => {
@@ -116,12 +145,13 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar hidden />
       <MapView
         ref={mapRef}
         style={StyleSheet.absoluteFillObject}
         initialRegion={initialRegion}
         customMapStyle={minimalMapStyle}
-        showsUserLocation={true}
+        showsUserLocation={false}
       >
         {restaurantsWithCoords
           ?.filter(
@@ -139,29 +169,39 @@ export default function HomeScreen() {
               }}
             >
               <View style={styles.markerContainer}>
-                  <Image source={{ uri: rest.imageUrl }} style={{ width: 50, height: 50, borderRadius: 25 }} />
-                {/* <View style={styles.bubble}> */}
-                  {/* <Text
-                    style={styles.name}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {rest.name || "Unnamed"}
-                  </Text>
-                  <Text
-                    style={styles.phone}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {rest.phone || "No phone"}
-                  </Text> */}
-                {/* </View> */}
-                {/* <View style={styles.arrowBorder} />
-                <View style={styles.arrow} /> */}
+                <Image
+                  source={{ uri: rest.imageUrl }}
+                  style={{ width: 50, height: 50, borderRadius: 25 }}
+                />
               </View>
             </Marker>
           ))}
+
+        {location && (
+          <Marker
+            coordinate={location}
+            title="You are here"
+            description="This is your current location"
+          >
+            <View style={{ alignItems: "center" }}>
+              {/* Picture above the default red pin */}
+              <Image
+                source={{
+                  uri: "https://i.pinimg.com/originals/c8/0d/5a/c80d5a2d2e1504e84a9d98f3cb825442.gif",
+                }}
+                style={{ width: 60, height: 60, marginBottom: 5 }}
+              />
+              {/* Default red pin will render automatically because no custom image is passed */}
+              <Ionicons name="location-sharp" size={10} />
+            </View>
+          </Marker>
+        )}
       </MapView>
+
+      {/* Floating button */}
+      <TouchableOpacity style={styles.locationButton} onPress={fetchLocation}>
+        <Ionicons name="locate" size={26} color="#007AFF" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -170,39 +210,38 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
 
   markerContainer: {
-  // alignItems: "center",
-  // backgroundColor: "#000",
-},
+    // alignItems: "center",
+    // backgroundColor: "#000",
+  },
 
-bubble: {
-  justifyContent: "center",
-  height:"100%",
-  width: "100%",
-  alignItems: "center",
-  backgroundColor: "white",
-  // borderRadius: 8,
-  borderColor: "#ccc",
-  borderWidth: 0.5,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 1 },
-  shadowOpacity: 0.3,
-  shadowRadius: 2,
-  elevation: 3,
-},
+  bubble: {
+    justifyContent: "center",
+    height: "100%",
+    width: "100%",
+    alignItems: "center",
+    backgroundColor: "white",
+    // borderRadius: 8,
+    borderColor: "#ccc",
+    borderWidth: 0.5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 3,
+  },
 
+  name: {
+    fontWeight: "bold",
+    fontSize: 14,
+    color: "#222",
+    flexShrink: 1, // allows text to shrink if needed but no cut
+  },
 
-name: {
-  fontWeight: "bold",
-  fontSize: 14,
-  color: "#222",
-  flexShrink: 1, // allows text to shrink if needed but no cut
-},
-
-phone: {
-  fontSize: 12,
-  color: "#555",
-  flexShrink: 1,
-},
+  phone: {
+    fontSize: 12,
+    color: "#555",
+    flexShrink: 1,
+  },
 
   arrow: {
     backgroundColor: "white",
@@ -226,5 +265,21 @@ phone: {
     width: 14,
     height: 14,
     backgroundColor: "transparent",
+  },
+  locationButton: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    backgroundColor: "white",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
 });

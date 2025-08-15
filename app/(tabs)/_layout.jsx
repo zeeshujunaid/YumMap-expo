@@ -1,81 +1,99 @@
 import { Tabs } from 'expo-router';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import React from 'react';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function TabLayout() {
   return (
     <Tabs
-      screenOptions={({ route }) => ({
+      screenOptions={{
         headerShown: false,
         tabBarShowLabel: true,
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '600',
-          marginTop: 4,
+          color: '#6a6a6a',
         },
-        tabBarStyle: styles.tabBarStyle,
-        tabBarActiveTintColor: '#4CAF50',
-        tabBarInactiveTintColor: '#8e8e8e',
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-          if (route.name === 'Homescreen') iconName = focused ? 'home' : 'home-outline';
-          else if (route.name === 'Scanner') iconName = focused ? 'qr-code' : 'qr-code-outline';
-          else if (route.name === 'Profilescreen') iconName = focused ? 'person' : 'person-outline';
-
-          return (
-            <View style={[styles.iconContainer, focused && styles.activeIconContainer]}>
-              <Ionicons name={iconName} size={24} color={color} />
-            </View>
-          );
+        tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          left: 20,
+          right: 20,
+          height: 60,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          backgroundColor: '#fff',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 5 },
+          shadowOpacity: 0.1,
+          shadowRadius: 10,
+          elevation: 10,
         },
-        tabBarLabel: ({ focused, color }) => {
-          return (
-            <View style={[styles.labelContainer, focused && styles.activeLabelContainer]}>
-              <Text style={{ color, fontWeight: focused ? '700' : '500', fontSize: 12 }}>
-                {route.name === 'Homescreen' ? 'Home' : route.name === 'Scanner' ? 'Scan' : 'Profile'}
-              </Text>
-            </View>
-          );
-        },
-      })}
+        tabBarActiveTintColor: '#40cf47',
+        tabBarInactiveTintColor: '#A4D7A6',
+      }}
     >
-      <Tabs.Screen name="Homescreen" />
-      <Tabs.Screen name="Scanner" />
-      <Tabs.Screen name="Profilescreen" />
+      {/* Home Tab */}
+      <Tabs.Screen
+        name="Homescreen"
+        options={{
+          tabBarIcon: ({ color }) => (
+            // <Ionicons name="home" size={24} color={color} />
+            <MaterialIcons name="home-filled" size={24} color="black" />
+          ),
+          tabBarLabel: 'Home',
+        }}
+      />
+
+      {/* Live Quiz Tab (Custom Center Button) */}
+      <Tabs.Screen
+        name="Scannerscreen"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View
+              style={[
+                styles.centerButton,
+                { backgroundColor: focused ? '#66BB6A' : '#4CAF50' },
+              ]}
+            >
+              {/* <Ionicons name="scan" size={28} color="white" /> */}
+              <MaterialIcons name="qr-code-scanner" size={24} color="black" />
+            </View>
+          ),
+          tabBarLabel: 'Live Quiz',
+        }}
+      />
+
+      {/* Profile Tab */}
+      <Tabs.Screen
+        name="Profilescreen"
+        options={{
+          tabBarIcon: ({ color }) => (
+            // <Ionicons name="person" size={24} color={color} />
+            <MaterialIcons name="person-2" size={24} color="black" />
+          ),
+          tabBarLabel: 'Profile',
+        }}
+      />
     </Tabs>
   );
 }
 
 const styles = StyleSheet.create({
-  tabBarStyle: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
-    height: 70,
+  centerButton: {
+    width: 60,
+    height: 60,
     borderRadius: 35,
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    bottom: 0,
+    left: '70%',
+    transform: [{ translateX: -35 }],
+    shadowColor: '#4CAF50',
     shadowOffset: { width: 0, height: 5 },
-    shadowRadius: 15,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
     elevation: 10,
-    paddingHorizontal: 10,
-  },
-  iconContainer: {
-    padding: 8,
-    borderRadius: 25,
-  },
-  activeIconContainer: {
-    backgroundColor: '#D0F0C0', // subtle green highlight behind icon
-  },
-  labelContainer: {
-    marginTop: 4,
-  },
-  activeLabelContainer: {
-    // you can add styles here if needed for active label
   },
 });
