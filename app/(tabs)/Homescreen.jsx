@@ -182,19 +182,7 @@ export default function HomeScreen() {
             coordinate={location}
             title="You are here"
             description="This is your current location"
-          >
-            <View style={{ alignItems: "center" }}>
-              {/* Picture above the default red pin */}
-              <Image
-                source={{
-                  uri: "https://i.pinimg.com/originals/c8/0d/5a/c80d5a2d2e1504e84a9d98f3cb825442.gif",
-                }}
-                style={{ width: 60, height: 60, marginBottom: 5 }}
-              />
-              {/* Default red pin will render automatically because no custom image is passed */}
-              <Ionicons name="location-sharp" size={10} />
-            </View>
-          </Marker>
+          />
         )}
       </MapView>
 

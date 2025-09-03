@@ -1,12 +1,16 @@
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import { getAuth, signOut } from "firebase/auth";
+import { useRouter } from "expo-router";
 
 const UserProfile = ({ data, favoriteRestaurants = [], onLogout }) => {
+  const router = useRouter();
+
   const handleLogout = () => {
     const auth = getAuth();
     signOut(auth)
       .then(() => {
         if (onLogout) onLogout();
+        router.push('Login')
       })
       .catch((error) => {
         console.error("Logout Error:", error);
